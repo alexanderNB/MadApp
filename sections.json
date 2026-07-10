@@ -1,0 +1,90 @@
+[{
+    "Name": "Grøntsager",
+    "ingrediantList": ["kartofler", "rødbeder", "salat", "gulerødder", "rød peberfrugt", "tomater", "agurker", "hvidkål", "broccoli", "blomkål", "æbler", "appelsiner", "bananer", "løg", "citron", "små kartofler", "druer", "frisk rosmarin", "frisk basilikum", "selleri", "purløg", "hvidløg", "persille", "champignon", "porrer", "rodfrugter", "ananas", "extra grøntsager", "kapers", "revet peberrod", "citroner", "rødløg", "asparges", "brøndkarse", "mandariner", "bønnespirer", "lime", "spinat", "peberfrugter", "salathoved", "svampe", "lemon", "porre", "gulerod", "koriander", "persillerod", "pærer", "aburgine", "mynte", "rosmarinsstilk", "rød peber", "grøn peber", "appelsin", "grøntsager", "peberfrugt", "kronhjortemørbrad", "frisk timian", "squash", "salvie", "timiankviste", "mango", "blommer", "frisk ingefær", "timiankvist", "frisk salvie", "agurk", "søde kartofler", "bladselleri", "hakkede tomater", "cherrytomater", "appelsiner øko", "ruccola", "melon", "kiwi", "rosmarin", "aubergine", "dild", "forårsløg", "jordskokker", "jordbær", "rosenkål", "sqaush", "frugt", "iceberg", "kirsebær"],
+    "ingrediantsWithUnits": {
+        "keys": ["tomater", "rødbeder", "ananas"],
+        "values": [{
+            "list": ["g", "dl", "stk", "Omgange", "Glas"]
+        }, {
+            "list": ["g", "dl", "stk"]
+        }, {
+            "list": ["g", "dl", "stk", "Omgange"]
+        }]
+    }
+}, {
+    "Name": "Kolonial",
+    "ingrediantList": ["mel", "sukker", "spaghetti", "pasta", "eddike", "rasp", "kulør", "flåede tomater", "bønner", "ketchup", "ris", "tortilla", "rødkål", "rødbeder", "lasagneplader", "nudler", "kokosmælk", "woksmag", "sennep", "maizena", "boullion", "mango chutney", "bearnaisesovs", "rosiner", "solsikkekerner", "honning", "teriakysovs", "soyasauce", "grødris", "rørsukker", "sød chilisovs", "dåseasparges", "balsamico", "mayonaise", "valnødder", "svedsker", "ribsgele", "hoisinsauce", "vineddike", "olivenolie", "mandler", "remoulade", "tun", "soltørrede tomater", "tomatpure", "tomater", "pastahorn", "ananas", "farin", "hollandaise sovs", "olie", "tomatsuppe", "gnocchi", "oliven", "perleløg", "soya", "hollandaisesovs", "brun farin", "soyasovs", "kikærter", "rødbede", "flormelis", "kakao", "kokosmel", "kaffe", "nødder", "havregryn", "suppehorn", "tyttebær", "risottoris", "kartoffelmel", "bagepulver", "syltet paprika", "engelsk sovs", "hindbærmarmelade", "husblas", "sambal oelek", "seamolie", "gul karrypasta", "svedske", "fiskesauce", "sesamolie", "durummel", "abrikos", "hasselnødder", "mandel", "pinjekerner", "tomatkoncentrat", "morneysauce", "fuldkornshvedemel", "æblecider", "æblecidereddike", "pastasauce", "hvedemel", "kirsebærsovs", "sursød sovs", "bearnaisse"],
+    "ingrediantsWithUnits": {
+        "keys": ["tomater", "rødbeder", "ananas"],
+        "values": [{
+            "list": ["Dåser"]
+        }, {
+            "list": ["Dåser", "Omgange", "Glas"]
+        }, {
+            "list": ["Dåser", "Glas"]
+        }]
+    }
+}, {
+    "Name": "Krydderier",
+    "ingrediantList": ["basilikum", "chili", "cayennepeber", "oregano", "timian", "paprika", "karry", "spidskommen", "ekstra krydderier", "muskatnød", "kanel", "cayenne peber", "extra krydderier", "ingefær", "garam massala", "stødt koriander", "sød chili", "gurkemeje", "fersken", "nellike", "laurbær", "vanillesukker", "enebær", "provence krydderi", "kardemomme", "herbes de provence", "krydderi", "laurbærblade", "kandiserede violer", "fennikel frø", "tabasco", "hp sauce", "hvid peber", "hjortetaksalt", "vaniljestang", "vanille"],
+    "ingrediantsWithUnits": {
+        "keys": [],
+        "values": []
+    }
+}, {
+    "Name": "Brød",
+    "ingrediantList": ["mørkt rugbrød", "rugbrød", "tvebakker", "naanbrød", "kammerjunkere", "tarteletter", "brød", "franskbrød", "kiks", "burgerboller"],
+    "ingrediantsWithUnits": {
+        "keys": [],
+        "values": []
+    }
+}, {
+    "Name": "Kød",
+    "ingrediantList": ["hakket oksekød", "hakket svinekød", "hjerter", "kyllingelår", "lammemørbrad", "andebryst", "medisterpølse", "and", "kylling", "kyllingebryst", "entrecote", "flæskesteg", "svinekoteletter", "fiskefars", "medister", "schnitzel", "oksetournados", "oksetern", "fiskefileter", "rejer", "bacon", "laks", "ribben", "laksefars", "hakket lam", "mørbrad", "hakket fakeoksekød", "pølser", "oksesteg", "svinetern", "kyllingetern", "lever", "høne", "cocktailpølser", "hvilling", "svinekød", "krondyrmørbrad", "oksefars", "flæsk", "oksesteak", "hakket lammekød", "skinkeschnitzel", "kyllingefilet", "hamburgerryg", "lam", "osso buco", "pulled pork", "rødspætter", "hakket kylling", "skinkeculotte", "oksebov", "hakket svinogkalv", "hakket kød"],
+    "ingrediantsWithUnits": {
+        "keys": [],
+        "values": []
+    }
+}, {
+    "Name": "Frost",
+    "ingrediantList": ["wokgrøntsager", "majs", "ærter", "flütes", "kød og melboller", "rösti", "fiskefiletter", "skovbær", "forårsruller", "grønkål", "fiskefilet", "is", "fryse rundstykker"],
+    "ingrediantsWithUnits": {
+        "keys": [],
+        "values": []
+    }
+}, {
+    "Name": "Mejeri",
+    "ingrediantList": ["mælk", "fløde", "smør", "creme fraiche", "æg", "ost", "revet ost", "flødeost", "frisk pasta", "sødmælk", "parmesan", "fetaost", "gorgonzola", "græsk yoghurt", "frisk mozarella", "kærnemælk", "emmental ost", "græsk youghurt", "feta", "emental ost", "tortellini", "piskefløde", "æggeblommer", "palmin", "mathilde", "parmsan", "mozzarella"],
+    "ingrediantsWithUnits": {
+        "keys": [],
+        "values": []
+    }
+}, {
+    "Name": "Pålæg",
+    "ingrediantList": ["serano skinke", "skinkepålæg", "leverpostej", "pålæg", "skinke", "sild", "parmaskinke", "salsicca pølse", "chorizo"],
+    "ingrediantsWithUnits": {
+        "keys": [],
+        "values": []
+    }
+}, {
+    "Name": "Drikkelse",
+    "ingrediantList": ["cola", "kondivand", "saftevand", "hvidtøl", "sherry", "whiskey", "hvidvin", "rødvin", "solbærsaft", "portvin", "snaps", "øl"],
+    "ingrediantsWithUnits": {
+        "keys": [],
+        "values": []
+    }
+}, {
+    "Name": "Rengøring",
+    "ingrediantList": [],
+    "ingrediantsWithUnits": {
+        "keys": [],
+        "values": []
+    }
+}, {
+    "Name": "Slik",
+    "ingrediantList": ["chips", "chokolade", "lakrids", "vingummier", "fredagsslik", "slik", "franske kartofler", "nougat", "smarties", "overtrækschokolade", "marcipan", "chokoladeruller", "peanuts"],
+    "ingrediantsWithUnits": {
+        "keys": [],
+        "values": []
+    }
+}]
