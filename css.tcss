@@ -1,33 +1,40 @@
 Screen {
-    align: center middle;
+    align: center top;
 }
 
 Button {
     width: 100%;
-    height: 100%;
+    /*height: 100%;*/
 }
+
+Select {
+    border: round $border;
+}
+
 
 #frontpage {
     layout: grid;
     grid-size: 1;
+    grid-rows: auto auto auto auto 1fr auto;
     margin: 1 5;
+    align: center top;
 }
 
 
 #findpage {
     layout: grid;
     grid-size: 2;
-    grid-rows: 1fr 2.5fr 1.5fr 2fr 3fr 1fr;
-
-    margin: 1 5;
-
+    grid-rows: auto auto auto auto 1fr auto;
+    margin: 1 2;
+    align: center top;
 }
 
-#search {
+
+#findpage-search {
     column-span: 2;
 }
 
-#results {
+#findpage-result-scroll {
     column-span: 2;
 }
 
@@ -35,3 +42,56 @@ Button {
     column-span: 2;
     margin: 0 10;
 }
+
+#dishcontainer {
+    layout: grid;
+    grid-size: 2;
+    grid-rows: auto auto auto 1fr auto;
+    margin: 1 5;
+    align: center top;
+}
+
+#dish-view-title {
+    column-span: 2;
+    text-align: center;
+    width: 2fr;
+    text-style: bold;
+}
+
+#dish-view-tags {
+    border: round $border;
+    layout: grid;
+    grid-rows: auto;
+}
+
+#dish-view-ingrediants {
+    border: round $border;
+    layout: grid;
+    grid-rows: auto;
+}
+
+
+#tag-remove {
+    max-width: 10%;
+}
+
+#tag-input {
+    max-width: 89%;
+}
+
+#ingrediant-unit {
+    border: none;
+}
+
+#ingrediant-remove {
+    max-width: 10%
+}
+
+#ingrediant-amount {
+    width: auto;
+}
+
+#ingrediant-input {
+    width: auto;
+}
+
