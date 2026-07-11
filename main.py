@@ -23,6 +23,13 @@ class MadApp(App):
     """A working 'desktop' calculator."""
     CSS_PATH = "css.tcss"
 
+    HORIZONTAL_BREAKPOINTS = [
+        (0, "-narrow"),
+        (40, "-normal"),
+        (80, "-wide"),
+        (120, "-very-wide"),
+    ]
+
     BINDINGS = [
             ("d", "dish_view", "Dish View")
             ]

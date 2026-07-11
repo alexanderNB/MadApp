@@ -1,5 +1,21 @@
 Screen {
     align: center top;
+    &.-narrow {
+        #dish-view-tags { column-span: 2; }
+        #dish-view-ingrediants { column-span: 2; }
+    }
+    &.-normal {
+        #dish-view-tags { column-span: 2; }
+        #dish-view-ingrediants { column-span: 2; }
+    }
+    &.-wide {
+        #dish-view-tags { column-span: 2; }
+        #dish-view-ingrediants { column-span: 2; }
+    }
+    &.-very-wide {
+        #dish-view-tags { column-span: 1; }
+        #dish-view-ingrediants { column-span: 1; }
+    }
 }
 
 Button {
@@ -46,7 +62,8 @@ Select {
 #dishcontainer {
     layout: grid;
     grid-size: 2;
-    grid-rows: auto auto auto 1fr auto;
+    /*grid-rows: auto auto auto 1fr auto;*/
+    grid-rows: auto;
     margin: 1 5;
     align: center top;
 }
@@ -64,11 +81,13 @@ Select {
     grid-rows: auto;
 }
 
+
 #dish-view-ingrediants {
     border: round $border;
     layout: grid;
     grid-rows: auto;
 }
+
 
 
 #tag-remove {
