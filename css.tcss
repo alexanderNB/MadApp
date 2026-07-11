@@ -1,18 +1,22 @@
 Screen {
     align: center top;
     &.-narrow {
+        #dishcontainer { grid-rows: auto auto auto 1fr 1fr auto; }
         #dish-view-tags { column-span: 2; }
         #dish-view-ingrediants { column-span: 2; }
     }
     &.-normal {
+        #dishcontainer { grid-rows: auto auto auto 1fr 1fr auto; }
         #dish-view-tags { column-span: 2; }
         #dish-view-ingrediants { column-span: 2; }
     }
     &.-wide {
+        #dishcontainer { grid-rows: auto auto auto 1fr 1fr auto; }
         #dish-view-tags { column-span: 2; }
         #dish-view-ingrediants { column-span: 2; }
     }
     &.-very-wide {
+        #dishcontainer { grid-rows: auto auto auto 1fr auto; }
         #dish-view-tags { column-span: 1; }
         #dish-view-ingrediants { column-span: 1; }
     }
@@ -63,7 +67,7 @@ Select {
     layout: grid;
     grid-size: 2;
     /*grid-rows: auto auto auto 1fr auto;*/
-    grid-rows: auto;
+    /*grid-rows: auto;*/
     margin: 1 5;
     align: center top;
 }
