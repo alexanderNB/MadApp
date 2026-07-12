@@ -15,8 +15,8 @@ from textual.containers import Container, VerticalScroll
 from textual.css.query import NoMatches
 from textual.notifications import Notification
 from textual.reactive import var
-from textual.widgets import Button, Digits, Header, Label, ListItem, ListView, Placeholder, SelectionList, Static, Input, Select
-from components import Tag, Ingrediant
+from textual.widgets import Button, Collapsible, Digits, Header, Label, ListItem, ListView, Placeholder, SelectionList, Static, Input, Select
+from components import RadioSelectionList, Tag, Ingrediant, MultiSelect
 
 
 class MadApp(App):
@@ -51,8 +51,9 @@ class MadApp(App):
                 yield Button("Tilføj opskrift", id="add")
                 yield Button("Find", id="find")
                 yield Button("Indkøbsliste", id="list")
+                # yield Static()
                 yield Button("Tilfældige", id="random")
-                yield Static()
+
                 yield Button("Load", id="load")
 
 
@@ -83,46 +84,54 @@ class MadApp(App):
 
         findpage = Container(id="findpage")
         maincontainer.mount(findpage)
-        results_list = SelectionList[int](id="findpage-results")
+        results_list = RadioSelectionList(id="findpage-results")
 
 
         findpage.mount_all([
             Input("", id="findpage-search"), 
-            SelectionList[int](
-                ("Oksekød", 0),
-                ("Kylling", 1),
-                ("Svinekød", 2),
-                ("Fisk", 3),
-                ("Vegetar", 4),
-                ("Andet", 5),
-                ("Dessert", 6),
-                id="findpage-meat"
-            ).toggle_all(),
-            SelectionList[int](
-                ("Pasta", 0),
-                ("Ris", 1),
-                ("Kartofler", 2),
-                ("Brød", 3),
-                ("Andet", 4),
-                id="findpage-side"
-            ).toggle_all(),
-            SelectionList[int](
-                ("Nem", 0),
-                ("Medium", 1),
-                ("Svær", 2),
-                id="findpage-difficulty"
-            ).toggle_all(),
-            SelectionList[int](
-                ("Mor", 0),
-                ("Alexander", 1),
-                id="findpage-profile"
-            ).toggle_all(),
-            SelectionList[int](
-                ("Tags...", 0),
+            MultiSelect(RadioSelectionList(
+                    ("Oksekød", "Oksekød"),
+                    ("Kylling", "Kylling"),
+                    ("Svinekød", "Svinekød"),
+                    ("Fisk", "Fisk"),
+                    ("Vegetar", "Vegetar"),
+                    ("Andet", "Andet"),
+                    ("Dessert", "Dessert"),
+                    id="findpage-meat",
+                ).toggle_all(),
+                title="Kød"
             ),
-            SelectionList[int](
-                ("Ingredienser...", 0),
+            MultiSelect(RadioSelectionList(
+                    ("Pasta", "Pasta"),
+                    ("Ris", "Ris"),
+                    ("Kartofler", "Kartofler"),
+                    ("Brød", "Brød"),
+                    ("Andet", "Andet"),
+                    id="findpage-side"
+                ).toggle_all(),
+                title="Tilbehør"
             ),
+            MultiSelect(RadioSelectionList(
+                    ("Nem", "Nem"),
+                    ("Medium", "Medium"),
+                    ("Svær", "Svær"),
+                    id="findpage-difficulty"
+                ).toggle_all(),
+                title="Sværhedsgrad"
+            ),
+            MultiSelect(RadioSelectionList(
+                    ("Mor", "Mor"),
+                    ("Alexander", "Alexander"),
+                    id="findpage-profile"
+                ).toggle_all(),
+                title="Profil"
+            ),
+            MultiSelect(RadioSelectionList(
+                ("Tags...", "Tags..."),
+            ), title="Tags"),
+            MultiSelect(RadioSelectionList(
+                ("Ingredienser...", "Ingredienser..."),
+            ), title="Ingredienser"),
             VerticalScroll(
                 results_list,
                 id="findpage-result-scroll"
@@ -134,7 +143,7 @@ class MadApp(App):
 
     
     @on(Input.Changed, "#findpage-search")
-    @on(SelectionList.SelectedChanged, "#findpage-meat,#findpage-side,#findpage-difficulty,#findpage-profile")
+    @on(RadioSelectionList.SelectedChanged, "#findpage-meat,#findpage-side,#findpage-difficulty,#findpage-profile")
     def search(self):
         search = self.query_one("#findpage-search")
         results_list = self.query_one("#findpage-results")
@@ -144,10 +153,10 @@ class MadApp(App):
         chosen_profile = self.query_one("#findpage-profile")
 
         results = [dish["Name"] for dish in self.dishes
-                    if dish["Meat"] in [chosen_meats.get_option_at_index(selection).prompt for selection in chosen_meats.selected]
-                    if dish["Side"] in [chosen_side.get_option_at_index(selection).prompt for selection in chosen_side.selected]
-                    if dish["Difficulty"] in [chosen_difficulty.get_option_at_index(selection).prompt for selection in chosen_difficulty.selected]
-                    if dish["Profile"] in [chosen_profile.get_option_at_index(selection).prompt for selection in chosen_profile.selected]
+                    if dish["Meat"] in [selection for selection in chosen_meats.selected]
+                    if dish["Side"] in [selection for selection in chosen_side.selected]
+                    if dish["Difficulty"] in [selection for selection in chosen_difficulty.selected]
+                    if dish["Profile"] in [selection for selection in chosen_profile.selected]
                     and search.value.lower() in dish["Name"].lower()
                     ]
 
