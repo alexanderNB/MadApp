@@ -133,6 +133,10 @@ Collapsible {
     &.-collapsed > Contents {
         display: none;
     }
+
+    &:focus-within {
+        background-tint: 0%;
+    }
 }
 CollapsibleTitle {
     text-style: $block-cursor-blurred-text-style;
@@ -174,5 +178,11 @@ SelectionList {
     & > .selection-list--button-selected-hover {
         color: $text-success;
         background: $block-hover-background;
+    }
+
+    border: tall $border;
+    background-tint: 2%;
+    &:focus {
+        background-tint: 2%;
     }
 }

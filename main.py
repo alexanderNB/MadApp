@@ -16,7 +16,7 @@ from textual.css.query import NoMatches
 from textual.notifications import Notification
 from textual.reactive import var
 from textual.widgets import Button, Collapsible, Digits, Header, Label, ListItem, ListView, Placeholder, SelectionList, Static, Input, Select
-from components import RadioSelectionList, Tag, Ingrediant, MultiSelect
+from components import EditableSelectionList, RadioSelectionList, Tag, Ingrediant, MultiSelect
 
 
 class MadApp(App):
@@ -51,9 +51,8 @@ class MadApp(App):
                 yield Button("Tilføj opskrift", id="add")
                 yield Button("Find", id="find")
                 yield Button("Indkøbsliste", id="list")
-                # yield Static()
                 yield Button("Tilfældige", id="random")
-
+                yield Static()
                 yield Button("Load", id="load")
 
 
@@ -98,7 +97,7 @@ class MadApp(App):
                     ("Andet", "Andet"),
                     ("Dessert", "Dessert"),
                     id="findpage-meat",
-                ).toggle_all(),
+                ),
                 title="Kød"
             ),
             MultiSelect(RadioSelectionList(
@@ -108,7 +107,7 @@ class MadApp(App):
                     ("Brød", "Brød"),
                     ("Andet", "Andet"),
                     id="findpage-side"
-                ).toggle_all(),
+                ),
                 title="Tilbehør"
             ),
             MultiSelect(RadioSelectionList(
@@ -116,14 +115,14 @@ class MadApp(App):
                     ("Medium", "Medium"),
                     ("Svær", "Svær"),
                     id="findpage-difficulty"
-                ).toggle_all(),
+                ),
                 title="Sværhedsgrad"
             ),
             MultiSelect(RadioSelectionList(
                     ("Mor", "Mor"),
                     ("Alexander", "Alexander"),
                     id="findpage-profile"
-                ).toggle_all(),
+                ),
                 title="Profil"
             ),
             MultiSelect(RadioSelectionList(
@@ -145,31 +144,31 @@ class MadApp(App):
     @on(Input.Changed, "#findpage-search")
     @on(RadioSelectionList.SelectedChanged, "#findpage-meat,#findpage-side,#findpage-difficulty,#findpage-profile")
     def search(self):
-        search = self.query_one("#findpage-search")
-        results_list = self.query_one("#findpage-results")
-        chosen_meats = self.query_one("#findpage-meat")
-        chosen_side = self.query_one("#findpage-side")
-        chosen_difficulty = self.query_one("#findpage-difficulty")
-        chosen_profile = self.query_one("#findpage-profile")
+        search: Input = self.query_one("#findpage-search", Input)
+        results_list: RadioSelectionList = self.query_one("#findpage-results", RadioSelectionList)
+        chosen_meats: RadioSelectionList = self.query_one("#findpage-meat", RadioSelectionList)
+        chosen_side: RadioSelectionList = self.query_one("#findpage-side", RadioSelectionList)
+        chosen_difficulty: RadioSelectionList = self.query_one("#findpage-difficulty", RadioSelectionList)
+        chosen_profile: RadioSelectionList = self.query_one("#findpage-profile", RadioSelectionList)
 
         results = [dish["Name"] for dish in self.dishes
-                    if dish["Meat"] in [selection for selection in chosen_meats.selected]
-                    if dish["Side"] in [selection for selection in chosen_side.selected]
-                    if dish["Difficulty"] in [selection for selection in chosen_difficulty.selected]
-                    if dish["Profile"] in [selection for selection in chosen_profile.selected]
+                    if len(chosen_meats.selected) == 0 or dish["Meat"] in [selection for selection in chosen_meats.selected]
+                    if len(chosen_side.selected) == 0 or dish["Side"] in [selection for selection in chosen_side.selected]
+                    if len(chosen_difficulty.selected) == 0 or dish["Difficulty"] in [selection for selection in chosen_difficulty.selected]
+                    if len(chosen_profile.selected) == 0 or dish["Profile"] in [selection for selection in chosen_profile.selected]
                     and search.value.lower() in dish["Name"].lower()
                     ]
 
         results_list.clear_options()
         results_list.add_options([(results, i) for i, results in enumerate(results)])
         
-    def _Select_with_label(self, select: Select, label: str):
+    def _Select_with_label(self, select: Select[str], label: str):
         select.border_title = label
         return select
 
-    @on(SelectionList.SelectedChanged, "#findpage-results")
+    # @on(SelectionList.SelectedChanged, "#findpage-results")
     def action_dish_view(self, dish=None):
-        results_list = self.query_one("#findpage-results")
+        results_list: RadioSelectionList = self.query_one("#findpage-results", RadioSelectionList)
 
 
         self.active_dish = [x for x in self.dishes if x["Name"] == results_list.get_option_at_index(results_list.selected[0]).prompt][0]

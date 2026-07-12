@@ -9,7 +9,7 @@ from textual.selection import Selection
 from textual.strip import Strip
 from textual.types import SelectType
 from textual.widget import Widget
-from textual.widgets import Button, Collapsible, Input, OptionList, RadioButton, Select, SelectionList
+from textual.widgets import Button, Collapsible, Input, Label, OptionList, RadioButton, Select, SelectionList
 from textual.widgets.option_list import OptionDoesNotExist
 
 
@@ -204,7 +204,7 @@ class MultiSelect(Widget):
     @on(RadioSelectionList.SelectedChanged)
     def update(self):
         if len(self.selection_list.selected) == 0:
-            self.collapsible.title = "None"
+            self.collapsible.title = "All"
             return
         self.collapsible.title = ""
         for selected in self.selection_list.selected.copy():
