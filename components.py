@@ -3,8 +3,10 @@ from rich.segment import Segment
 from rich.style import Style
 from textual import events, on
 from textual.app import ComposeResult
-from textual.containers import Horizontal, HorizontalGroup
+from textual.containers import Horizontal, HorizontalGroup, VerticalGroup, VerticalScroll
+from textual.content import Content
 from textual.message import Message
+from textual.scroll_view import ScrollView
 from textual.selection import Selection
 from textual.strip import Strip
 from textual.types import SelectType
@@ -217,3 +219,37 @@ class MultiSelect(Widget):
         if event.widget != self.selection_list:
             self.collapsible.collapsed = not self.collapsible.collapsed
 
+
+
+class DishElement(HorizontalGroup):
+    def __init__(self, label="", value=False, edit_function=None, selected_function=None):
+        self.edit_button = Button("Edit", id="dish-edit", compact=True)
+        self.element = RadioButton(label, id="dish-element", compact=True)
+        if value:
+            self.element.toggle()
+        self.edit_function = edit_function
+        self.selected_function = selected_function
+        super().__init__()
+
+    def compose(self) -> ComposeResult:
+        yield self.edit_button
+        yield self.element
+
+    def on_button_pressed(self) -> None:
+        self.edit_function()
+
+    @on(RadioButton.Changed)
+    def selected(self):
+        if self.selected_function:
+            self.selected_function(self.element.value)
+
+class ShoppingListSection(VerticalGroup):
+    def __init__(self, label: str, ingrediants: RadioSelectionList, id: str | None = None) -> None:
+        self.label = Label(label)
+        self.ingrediants = ingrediants
+        super().__init__()
+
+    @override
+    def compose(self) -> ComposeResult:
+        yield self.label
+        yield self.ingrediants

@@ -8,6 +8,7 @@ from ast import main
 from decimal import Decimal
 import json
 import time
+from typing import Any, Literal
 
 from textual import events, on
 from textual.app import App, ComposeResult
@@ -16,10 +17,10 @@ from textual.css.query import NoMatches
 from textual.notifications import Notification
 from textual.reactive import var
 from textual.widgets import Button, Collapsible, Digits, Header, Label, ListItem, ListView, Placeholder, SelectionList, Static, Input, Select
-from components import EditableSelectionList, RadioSelectionList, Tag, Ingrediant, MultiSelect
+from components import RadioSelectionList, Tag, Ingrediant, MultiSelect, DishElement, ShoppingListSection
 
 
-class MadApp(App):
+class MadApp(App[Any]):
     """A working 'desktop' calculator."""
     CSS_PATH = "css.tcss"
 
@@ -34,23 +35,39 @@ class MadApp(App):
             ("d", "dish_view", "Dish View")
             ]
 
-    @staticmethod
-    def _dishes():
-        with open("dishes.json", mode="r", encoding="utf-8") as dishes_file:
-             return json.load(dishes_file)
+    @property
+    def dishes(self) -> list[
+                            dict[
+                                Literal["Difficulty"] | Literal["Ingrediants"] | Literal["Meat"] | Literal["Name"] | Literal["Profile"] | Literal["Side"] | Literal["Tags"],
+                                str | list[dict[Literal["Amount"] | Literal["Name"] | Literal["Unit"], str | int]] | list[str]
+                            ]
+                        ]:
+        with open("dishes.json", mode="r", encoding="utf-8") as file:
+            return json.load(file)
 
-    dishes = _dishes()
+
+    @property 
+    def sections(self) ->   list[
+                                dict[
+                                    Literal["Name"] | Literal["ingrediantList"] | Literal["ingrediantsWithUnits"],
+                                    str | list[str] | dict[str, list[str]]
+                                ]
+                            ]:
+        with open("sections.json", mode="r", encoding="utf-8") as file:
+            return json.load(file)
+
+
     active_dish = None
+    selected_dishes = []
     
 
     def compose(self) -> ComposeResult:
-
 
         with Container(id="maincontainer"):
             with Container(id="frontpage"):
                 yield Button("Tilføj opskrift", id="add")
                 yield Button("Find", id="find")
-                yield Button("Indkøbsliste", id="list")
+                yield Button("Indkøbsliste", id="shopping-list")
                 yield Button("Tilfældige", id="random")
                 yield Static()
                 yield Button("Load", id="load")
@@ -63,17 +80,22 @@ class MadApp(App):
 
         frontpage = Container(id="frontpage")
         maincontainer.mount(frontpage)
+        selected_dishes = VerticalScroll(id="frontpage-selected-dishes")
+        selected_dishes.border_title = "Valgte opskrifter"
 
         frontpage.mount_all([
             Button("Tilføj opskrift", id="add"),
             Button("Find", id="find"),
-            Button("Indkøbsliste", id="list"),
+            Button("Indkøbsliste", id="shopping-list"),
             Button("Tilfældige", id="random"),
-            Static(),
-            Static(),
-            Static(),
-            Static(),
+            selected_dishes,
             Button("Load", id="load"),
+            ])
+
+
+
+        selected_dishes.mount_all([
+            DishElement(result["Name"], value=True, edit_function=lambda x=result: (self.dish_view(dish=x)), selected_function=lambda value, x=result: self.selected_dish(x, value)) for result in self.selected_dishes
             ])
 
     @on(Button.Pressed, "#find")
@@ -83,7 +105,8 @@ class MadApp(App):
 
         findpage = Container(id="findpage")
         maincontainer.mount(findpage)
-        results_list = RadioSelectionList(id="findpage-results")
+        results_list = VerticalScroll(id="findpage-results")
+        results_list.border_title = "Opskrifter"
 
 
         findpage.mount_all([
@@ -131,10 +154,7 @@ class MadApp(App):
             MultiSelect(RadioSelectionList(
                 ("Ingredienser...", "Ingredienser..."),
             ), title="Ingredienser"),
-            VerticalScroll(
-                results_list,
-                id="findpage-result-scroll"
-            ),
+            results_list,
             Button("Tilbage", id="back"),
         ])
         self.search()
@@ -145,34 +165,38 @@ class MadApp(App):
     @on(RadioSelectionList.SelectedChanged, "#findpage-meat,#findpage-side,#findpage-difficulty,#findpage-profile")
     def search(self):
         search: Input = self.query_one("#findpage-search", Input)
-        results_list: RadioSelectionList = self.query_one("#findpage-results", RadioSelectionList)
+        results_list: VerticalScroll = self.query_one("#findpage-results", VerticalScroll)
         chosen_meats: RadioSelectionList = self.query_one("#findpage-meat", RadioSelectionList)
         chosen_side: RadioSelectionList = self.query_one("#findpage-side", RadioSelectionList)
         chosen_difficulty: RadioSelectionList = self.query_one("#findpage-difficulty", RadioSelectionList)
         chosen_profile: RadioSelectionList = self.query_one("#findpage-profile", RadioSelectionList)
 
-        results = [dish["Name"] for dish in self.dishes
+        results = [dish for dish in self.dishes
                     if len(chosen_meats.selected) == 0 or dish["Meat"] in [selection for selection in chosen_meats.selected]
                     if len(chosen_side.selected) == 0 or dish["Side"] in [selection for selection in chosen_side.selected]
                     if len(chosen_difficulty.selected) == 0 or dish["Difficulty"] in [selection for selection in chosen_difficulty.selected]
                     if len(chosen_profile.selected) == 0 or dish["Profile"] in [selection for selection in chosen_profile.selected]
-                    and search.value.lower() in dish["Name"].lower()
+                    if search.value.lower() in dish["Name"].lower()
                     ]
 
-        results_list.clear_options()
-        results_list.add_options([(results, i) for i, results in enumerate(results)])
+        results_list.remove_children()
+        results_list.mount_all([
+            DishElement(result["Name"], value=result in self.selected_dishes, edit_function=lambda x=result: (self.dish_view(dish=x)), selected_function=lambda value, x=result: self.selected_dish(x, value) ) for result in results
+            ])
         
     def _Select_with_label(self, select: Select[str], label: str):
         select.border_title = label
         return select
 
-    # @on(SelectionList.SelectedChanged, "#findpage-results")
-    def action_dish_view(self, dish=None):
-        results_list: RadioSelectionList = self.query_one("#findpage-results", RadioSelectionList)
+    def selected_dish(self, dish, value):
+        if dish in self.selected_dishes:
+            self.selected_dishes.remove(dish)
+        if value:
+            self.selected_dishes.append(dish)
+        
 
-
-        self.active_dish = [x for x in self.dishes if x["Name"] == results_list.get_option_at_index(results_list.selected[0]).prompt][0]
-
+    def dish_view(self, dish):
+        self.active_dish = dish
 
         maincontainer = self.query_one("#maincontainer")
         maincontainer.remove_children()
@@ -273,12 +297,87 @@ class MadApp(App):
         self.active_dish["Tags"] = [tag.input.value for tag in tag_list.children if isinstance(tag, Tag)]
         self.active_dish["Ingrediants"] = [
                 {
-                    "Amount": ingrediant.amount_input.value,
+                    "Amount": int(ingrediant.amount_input.value),
                     "Name": ingrediant.input.value,
                     "Unit": ingrediant.unit_select.value
                 } for ingrediant in ingrediant_list.children if isinstance(ingrediant, Ingrediant)]
 
+    @on(Button.Pressed, "#shopping-list")
+    def shopping_list(self):
+        maincontainer = self.query_one("#maincontainer")
+        maincontainer.remove_children()
 
+        shopping_container = Container(id="shoppingcontainer")
+        maincontainer.mount(shopping_container)
+        
+        ingrediants = {}
+        for dish in self.selected_dishes:
+            for ingrediant in dish["Ingrediants"]:
+                if ingrediant["Name"] not in ingrediants:
+                    ingrediants[ingrediant["Name"].lower()] = {}
+                if ingrediant["Unit"] not in ingrediants[ingrediant["Name"].lower()]:
+                    ingrediants[ingrediant["Name"].lower()][ingrediant["Unit"]] = 0
+                ingrediants[ingrediant["Name"].lower()][ingrediant["Unit"]] += ingrediant["Amount"]
+
+        sorted_ingrediants = {section["Name"]: {} for section in self.sections}
+        sorted_ingrediants["Andet"] = {}
+        for ingrediant in ingrediants:
+            ingrediant: str # Just the name of the ingrediant
+            in_section = False
+            for section in self.sections:
+                if ingrediant not in section["ingrediantList"]:
+                    continue
+
+                ingrediant_already_sorted: bool = ingrediant in sorted_ingrediants[section["Name"]]
+                if ingrediant_already_sorted:
+                    in_section = True
+                    break
+
+                if ingrediant in section["ingrediantsWithUnits"].keys():
+                    sorted_ingrediants[section["Name"]][ingrediant] = {}
+
+                    for unit in ingrediants[ingrediant]: # Loops through each unit, only adding the units specified in section["ingrediantsWithUnits"]
+                        unit: str # Just the name of the unit
+                        unit_in_section: bool = unit in section["ingrediantsWithUnits"][ingrediant]
+                        if unit_in_section:
+                            amount: int = ingrediants[ingrediant][unit]
+                            sorted_ingrediants[section["Name"]][ingrediant][unit] = amount
+
+                    # If none of the units for the section was present the ingrediant is removed from the section
+                    if len(sorted_ingrediants[section["Name"]][ingrediant]) == 0: 
+                        sorted_ingrediants[section["Name"]].pop(ingrediant)
+
+                    in_section = True # NOTE: this assumes that all units for the given ingrediant have been defined in a section
+                    continue
+
+                # If the unit is not specified in 'section["ingrediantsWithUnits"]' the ingrediant for the section gets the entire {<unit: amount>} dict
+                sorted_ingrediants[section["Name"]][ingrediant] = ingrediants[ingrediant]
+
+                in_section = True
+                break
+
+            if not in_section:
+                sorted_ingrediants["Andet"][ingrediant] = ingrediants[ingrediant]
+
+
+        list_container = VerticalScroll(
+            *[ShoppingListSection(
+                ingrediants=RadioSelectionList(
+                    *[(f"{ingrediant.title()}: {self._unpack_str_list([f"{ingrediants[ingrediant][unit]} {unit}" for unit in sorted_ingrediants[ingrediant_section][ingrediant]], " + ")}", f"{ingrediant}: {self._unpack_str_list([f"{ingrediants[ingrediant][unit]} {unit}" for unit in sorted_ingrediants[ingrediant_section][ingrediant]], " + ")}") for ingrediant in sorted_ingrediants[ingrediant_section]] 
+                ),
+                label=ingrediant_section
+            ) for ingrediant_section in sorted_ingrediants]
+        )
+
+        shopping_container.mount(list_container)
+
+        shopping_container.mount(Button("Tilbage", id="back"))
+
+    def _unpack_str_list(self, list, separator=""):
+        result = ""
+        for element in list:
+            result += element + separator
+        return result.removesuffix(separator)
 
 
 if __name__ == "__main__":
