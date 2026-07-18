@@ -1,14 +1,8 @@
-"""
-An implementation of a classic calculator, with a layout inspired by macOS calculator.
-
-Works like a real calculator. Click the buttons or press the equivalent keys.
-"""
-
 from ast import main
 from decimal import Decimal
 import json
 import time
-from typing import Any, Literal
+from typing import Any, Literal, ReadOnly
 
 from textual import events, on
 from textual.app import App, ComposeResult
@@ -45,8 +39,12 @@ class MadApp(App[Any]):
         with open("dishes.json", mode="r", encoding="utf-8") as file:
             return json.load(file)
 
+    def write_to_dishes(self, updated_dishes):
+        with open("dishes.json", mode="w", encoding="utf-8") as file:
+            json.dump(updated_dishes, file, indent=4, sort_keys=False, ensure_ascii=False)
 
-    @property 
+
+    @property
     def sections(self) ->   list[
                                 dict[
                                     Literal["Name"] | Literal["ingrediantList"] | Literal["ingrediantsWithUnits"],
@@ -56,10 +54,26 @@ class MadApp(App[Any]):
         with open("sections.json", mode="r", encoding="utf-8") as file:
             return json.load(file)
 
+    def write_to_sections(self, updated_sections):
+        with open("sections.json", mode="w", encoding="utf-8") as file:
+            json.dump(updated_sections, file, indent=4, sort_keys=False, ensure_ascii=False)
 
-    active_dish = None
-    selected_dishes = []
-    
+
+    @property
+    def selections(self):
+        with open("active_selections.json", mode="r", encoding="utf-8") as file:
+            return json.load(file)[self.profile]
+
+    def write_to_selections(self, updated_selections):
+        with open("active_selections.json", mode="r", encoding="utf-8") as file:
+            full_json = json.load(file)
+        full_json[self.profile] = updated_selections
+        with open("active_selections.json", mode="w", encoding="utf-8") as file:
+            json.dump(full_json, file, indent=4, sort_keys=False, ensure_ascii=False)
+
+
+    profile = "Alexander"
+    active_dish_index = None
 
     def compose(self) -> ComposeResult:
 
@@ -69,7 +83,9 @@ class MadApp(App[Any]):
                 yield Button("Find", id="find")
                 yield Button("Indkøbsliste", id="shopping-list")
                 yield Button("Tilfældige", id="random")
-                yield Static()
+                with VerticalScroll(id="frontpage-selected-dishes"):
+                    for dish_index in self.selections["dishes"]:
+                        yield DishElement(self.dishes[dish_index]["Name"], value=True, edit_function=lambda x=dish_index: (self.dish_view(dish_index=x)), selected_function=lambda value, x=dish_index: self.selected_dish(x, value))
                 yield Button("Load", id="load")
 
 
@@ -92,10 +108,8 @@ class MadApp(App[Any]):
             Button("Load", id="load"),
             ])
 
-
-
         selected_dishes.mount_all([
-            DishElement(result["Name"], value=True, edit_function=lambda x=result: (self.dish_view(dish=x)), selected_function=lambda value, x=result: self.selected_dish(x, value)) for result in self.selected_dishes
+            DishElement(self.dishes[dish_index]["Name"], value=True, edit_function=lambda x=dish_index: (self.dish_view(dish_index=x)), selected_function=lambda value, x=dish_index: self.selected_dish(x, value)) for dish_index in self.selections["dishes"]
             ])
 
     @on(Button.Pressed, "#find")
@@ -181,23 +195,24 @@ class MadApp(App[Any]):
 
         results_list.remove_children()
         results_list.mount_all([
-            DishElement(result["Name"], value=result in self.selected_dishes, edit_function=lambda x=result: (self.dish_view(dish=x)), selected_function=lambda value, x=result: self.selected_dish(x, value) ) for result in results
+            DishElement(result["Name"], value=i in self.selections["dishes"], edit_function=lambda x=i: (self.dish_view(dish_index=x)), selected_function=lambda value, x=i: self.selected_dish(x, value) ) for i, result in enumerate(results)
             ])
         
     def _Select_with_label(self, select: Select[str], label: str):
         select.border_title = label
         return select
 
-    def selected_dish(self, dish, value):
-        if dish in self.selected_dishes:
-            self.selected_dishes.remove(dish)
+    def selected_dish(self, dish_index, value):
+        selections = self.selections
+        if dish_index in selections["dishes"]:
+            selections["dishes"].remove(dish_index)
         if value:
-            self.selected_dishes.append(dish)
-        
+            selections["dishes"].append(dish_index)
+        self.write_to_selections(selections)
 
-    def dish_view(self, dish):
-        self.active_dish = dish
-
+    def dish_view(self, dish_index):
+        self.active_dish_index = dish_index
+        dish = self.dishes[dish_index]
         maincontainer = self.query_one("#maincontainer")
         maincontainer.remove_children()
 
@@ -205,13 +220,13 @@ class MadApp(App[Any]):
         maincontainer.mount(dish_container)
 
         tag_container = VerticalScroll(
-                *[Tag(tag) for tag in self.active_dish["Tags"]],
+                *[Tag(tag) for tag in dish["Tags"]],
                 Button("Add tag", id="dish-view-add-tag"),
                 id="dish-view-tags",
             )
         tag_container.border_title = "Tags"
         ingrediant_container = VerticalScroll(
-                *[Ingrediant(ingrediant["Name"], ingrediant["Unit"], ingrediant["Amount"]) for ingrediant in self.active_dish["Ingrediants"]],
+                *[Ingrediant(ingrediant["Name"], ingrediant["Unit"], ingrediant["Amount"]) for ingrediant in dish["Ingrediants"]],
                 Button("Add Ingrediant", id="dish-view-add-ingrediant"),
                 id="dish-view-ingrediants",
             )
@@ -219,7 +234,7 @@ class MadApp(App[Any]):
         
 
         dish_container.mount_all([
-            Input(self.active_dish["Name"], id="dish-view-title"),
+            Input(dish["Name"], id="dish-view-title"),
             self._Select_with_label(
                 Select[str]([
                     ("Oksekød", "Oksekød"),
@@ -229,7 +244,7 @@ class MadApp(App[Any]):
                     ("Vegetar", "Vegetar"),
                     ("Andet", "Andet"),
                     ("Dessert", "Dessert")], 
-                    value=self.active_dish["Meat"],
+                    value=dish["Meat"],
                     allow_blank=False,
                     id="dish-view-meat"
                 ), "Kød"),
@@ -240,7 +255,7 @@ class MadApp(App[Any]):
                     ("Kartofler", "Kartofler"),
                     ("Brød", "Brød"),
                     ("Andet", "Andet")],
-                    value=self.active_dish["Side"],
+                    value=dish["Side"],
                     allow_blank=False,
                     id="dish-view-side"
                 ), "Tilbehør"),
@@ -249,7 +264,7 @@ class MadApp(App[Any]):
                     ("Nem", "Nem"),
                     ("Medium", "Medium"),
                     ("Svær", "Svær")],
-                    value=self.active_dish["Difficulty"],
+                    value=dish["Difficulty"],
                     allow_blank=False,
                     id="dish-view-difficulty"
                 ), "Sværhedsgrad"),
@@ -257,7 +272,7 @@ class MadApp(App[Any]):
                 Select[str]([
                     ("Mor", "Mor"),
                     ("Alexander", "Alexander")],
-                    value=self.active_dish["Profile"],
+                    value=dish["Profile"],
                     allow_blank=False,
                     id="dish-view-profile"
                 ), "Profile"),
@@ -288,19 +303,23 @@ class MadApp(App[Any]):
         tag_list: VerticalScroll = self.query_one("#dish-view-tags", VerticalScroll)
         ingrediant_list: VerticalScroll = self.query_one("#dish-view-ingrediants", VerticalScroll)
         
-
-        self.active_dish["Name"] = title.value
-        self.active_dish["Meat"] = chosen_meat.value
-        self.active_dish["Side"] = chosen_side.value
-        self.active_dish["Difficulty"] = chosen_difficulty.value
-        self.active_dish["Profile"] = chosen_profile.value
-        self.active_dish["Tags"] = [tag.input.value for tag in tag_list.children if isinstance(tag, Tag)]
-        self.active_dish["Ingrediants"] = [
+        dish = self.dishes[self.active_dish_index].copy()
+        dish["Name"] = title.value
+        dish["Meat"] = chosen_meat.value
+        dish["Side"] = chosen_side.value
+        dish["Difficulty"] = chosen_difficulty.value
+        dish["Profile"] = chosen_profile.value
+        dish["Tags"] = [tag.input.value for tag in tag_list.children if isinstance(tag, Tag)]
+        dish["Ingrediants"] = [
                 {
                     "Amount": int(ingrediant.amount_input.value),
                     "Name": ingrediant.input.value,
                     "Unit": ingrediant.unit_select.value
                 } for ingrediant in ingrediant_list.children if isinstance(ingrediant, Ingrediant)]
+
+        updated_dishes = self.dishes.copy()
+        updated_dishes[self.active_dish_index] = dish.copy()
+        self.write_to_dishes(updated_dishes)
 
     @on(Button.Pressed, "#shopping-list")
     def shopping_list(self):
@@ -311,7 +330,8 @@ class MadApp(App[Any]):
         maincontainer.mount(shopping_container)
         
         ingrediants = {}
-        for dish in self.selected_dishes:
+        for dish_index in self.selections["dishes"]:
+            dish = self.dishes[dish_index]
             for ingrediant in dish["Ingrediants"]:
                 if ingrediant["Name"] not in ingrediants:
                     ingrediants[ingrediant["Name"].lower()] = {}
@@ -382,6 +402,3 @@ class MadApp(App[Any]):
 
 if __name__ == "__main__":
     MadApp().run()
-
-
-
