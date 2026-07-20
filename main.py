@@ -185,7 +185,7 @@ class MadApp(App[Any]):
         chosen_difficulty: RadioSelectionList = self.query_one("#findpage-difficulty", RadioSelectionList)
         chosen_profile: RadioSelectionList = self.query_one("#findpage-profile", RadioSelectionList)
 
-        results = [dish for dish in self.dishes
+        results = [(dish_index, dish) for dish_index, dish in enumerate(self.dishes)
                     if len(chosen_meats.selected) == 0 or dish["Meat"] in [selection for selection in chosen_meats.selected]
                     if len(chosen_side.selected) == 0 or dish["Side"] in [selection for selection in chosen_side.selected]
                     if len(chosen_difficulty.selected) == 0 or dish["Difficulty"] in [selection for selection in chosen_difficulty.selected]
@@ -195,7 +195,7 @@ class MadApp(App[Any]):
 
         results_list.remove_children()
         results_list.mount_all([
-            DishElement(result["Name"], value=i in self.selections["dishes"], edit_function=lambda x=i: (self.dish_view(dish_index=x)), selected_function=lambda value, x=i: self.selected_dish(x, value) ) for i, result in enumerate(results)
+            DishElement(dish["Name"], value=dish_index in self.selections["dishes"], edit_function=lambda x=dish_index: (self.dish_view(dish_index=x)), selected_function=lambda value, x=dish_index: self.selected_dish(x, value) ) for dish_index, dish in results
             ])
         
     def _Select_with_label(self, select: Select[str], label: str):
@@ -208,6 +208,7 @@ class MadApp(App[Any]):
             selections["dishes"].remove(dish_index)
         if value:
             selections["dishes"].append(dish_index)
+        # selections["ingrediants"] = []
         self.write_to_selections(selections)
 
     def dish_view(self, dish_index):
@@ -383,15 +384,33 @@ class MadApp(App[Any]):
         list_container = VerticalScroll(
             *[ShoppingListSection(
                 ingrediants=RadioSelectionList(
-                    *[(f"{ingrediant.title()}: {self._unpack_str_list([f"{ingrediants[ingrediant][unit]} {unit}" for unit in sorted_ingrediants[ingrediant_section][ingrediant]], " + ")}", f"{ingrediant}: {self._unpack_str_list([f"{ingrediants[ingrediant][unit]} {unit}" for unit in sorted_ingrediants[ingrediant_section][ingrediant]], " + ")}") for ingrediant in sorted_ingrediants[ingrediant_section]] 
+                    *[
+                        (
+                            f"{ingrediant.title()}: {self._unpack_str_list([f"{ingrediants[ingrediant][unit]} {unit}" for unit in sorted_ingrediants[ingrediant_section][ingrediant]], " + ")}",
+                             (ingrediant, self._unpack_str_list([unit for unit in sorted_ingrediants[ingrediant_section][ingrediant]], ",")),
+                             [ingrediant, self._unpack_str_list([unit for unit in sorted_ingrediants[ingrediant_section][ingrediant]], ",")] in self.selections["ingrediants"]
+                        ) for ingrediant in sorted_ingrediants[ingrediant_section]],
+                    id="shopping-list-ingrediants"
                 ),
-                label=ingrediant_section
+                label=ingrediant_section,
             ) for ingrediant_section in sorted_ingrediants]
         )
 
         shopping_container.mount(list_container)
 
         shopping_container.mount(Button("Tilbage", id="back"))
+
+    @on(RadioSelectionList.SelectedChanged, "#shopping-list-ingrediants")
+    def selected_ingrediant(self):
+        shopping_list = self.query("#shopping-list-ingrediants")
+        selected = []
+        for section in shopping_list:
+            selected.extend(section.selected)
+        updated_selections = self.selections.copy()
+        updated_selections["ingrediants"] = selected
+        self.write_to_selections(updated_selections)
+
+
 
     def _unpack_str_list(self, list, separator=""):
         result = ""
