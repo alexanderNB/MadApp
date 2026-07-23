@@ -188,6 +188,7 @@ class RadioSelectionList(SelectionList[str]):
 class MultiSelect(Widget):
     ALLOW_SELECT = False
 
+    
     def __init__(self, selection: RadioSelectionList, title=None):
         self.selection_list: RadioSelectionList = selection
         # self.collapsible: BetterCollapsible = BetterCollapsible()
@@ -213,12 +214,18 @@ class MultiSelect(Widget):
             self.collapsible.title += selected + ", "
         self.collapsible.title = self.collapsible.title.removesuffix(", ")
 
+    @override
     async def _on_click(self, event: events.Click) -> None:
         """Inform ancestor we want to toggle."""
         event.stop()
         if event.widget != self.selection_list:
             self.collapsible.collapsed = not self.collapsible.collapsed
 
+    @override
+    def _on_leave(self, event: events.Leave) -> None:
+        if not self.is_mouse_over:
+            self.collapsible.collapsed = True
+        return super()._on_leave(event)
 
 
 class DishElement(HorizontalGroup):
