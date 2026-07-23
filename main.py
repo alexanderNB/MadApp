@@ -13,6 +13,8 @@ from textual.reactive import var
 from textual.widgets import Button, Collapsible, Digits, Header, Label, ListItem, ListView, Placeholder, SelectionList, Static, Input, Select
 from components import RadioSelectionList, Tag, Ingrediant, MultiSelect, DishElement, ShoppingListSection
 
+import sys
+
 
 class MadApp(App[Any]):
     """A working 'desktop' calculator."""
@@ -72,7 +74,8 @@ class MadApp(App[Any]):
             json.dump(full_json, file, indent=4, sort_keys=False, ensure_ascii=False)
 
 
-    profile = "Alexander"
+    profile = sys.argv[1] if len(sys.argv) == 2 else "Alexander"
+
     active_dish_index = None
 
     def compose(self) -> ComposeResult:
@@ -334,7 +337,7 @@ class MadApp(App[Any]):
         for dish_index in self.selections["dishes"]:
             dish = self.dishes[dish_index]
             for ingrediant in dish["Ingrediants"]:
-                if ingrediant["Name"] not in ingrediants:
+                if ingrediant["Name"].lower() not in ingrediants:
                     ingrediants[ingrediant["Name"].lower()] = {}
                 if ingrediant["Unit"] not in ingrediants[ingrediant["Name"].lower()]:
                     ingrediants[ingrediant["Name"].lower()][ingrediant["Unit"]] = 0
