@@ -15,30 +15,6 @@ from textual.widgets import Button, Collapsible, Input, Label, OptionList, Radio
 from textual.widgets.option_list import OptionDoesNotExist
 
 
-# Source - https://stackoverflow.com/a/68982836
-# Posted by Vito Gentile
-# Retrieved 2026-07-23, License - CC BY-SA 4.0
-
-from jnius import autoclass
-
-
-def show_android_keyboard():
-    InputMethodManager = autoclass("android.view.inputmethod.InputMethodManager")
-    PythonActivity = autoclass("org.kivy.android.PythonActivity")
-    Context = autoclass("android.content.Context")
-    activity = PythonActivity.mActivity
-    service = activity.getSystemService(Context.INPUT_METHOD_SERVICE)
-    service.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0)
-
-
-def hide_android_keyboard():
-    PythonActivity = autoclass("org.kivy.android.PythonActivity")
-    Context = autoclass("android.content.Context")
-    activity = PythonActivity.mActivity
-    service = activity.getSystemService(Context.INPUT_METHOD_SERVICE)
-    service.hideSoftInputFromWindow(activity.getContentView().getWindowToken(), 0)
-
-
 class Tag(HorizontalGroup):
     def __init__(self, tag=""):
         self.remove_button = Button("\uf00d", id="tag-remove", variant="error")
@@ -211,12 +187,6 @@ class DismissHandlingContainer(Container):
         for multi_select in self.query_children(MultiSelect):
             if not multi_select.is_mouse_over and not multi_select.collapsible.is_mouse_over and not multi_select.selection_list.is_mouse_over:
                 multi_select.collapsible.collapsed = True
-
-        if self.query_one(Input).is_mouse_over:
-            show_android_keyboard()
-        else:
-            hide_android_keyboard()
-
 
         return await super()._on_mouse_down(event)
 
