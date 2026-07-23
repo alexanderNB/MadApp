@@ -3,7 +3,7 @@ from rich.segment import Segment
 from rich.style import Style
 from textual import events, on
 from textual.app import ComposeResult
-from textual.containers import Horizontal, HorizontalGroup, VerticalGroup, VerticalScroll
+from textual.containers import Container, Horizontal, HorizontalGroup, VerticalGroup, VerticalScroll
 from textual.content import Content
 from textual.message import Message
 from textual.scroll_view import ScrollView
@@ -185,6 +185,17 @@ class RadioSelectionList(SelectionList[str]):
             ]
         )
 
+class DismissHandlingContainer(Container):
+    @override
+    async def _on_mouse_down(self, event: events.MouseDown) -> None:
+        thing = self.query_children(MultiSelect)
+        for t in thing:
+            if not t.is_mouse_over and not t.collapsible.is_mouse_over and not t.selection_list.is_mouse_over:
+                t.collapsible.collapsed = True
+        return await super()._on_mouse_down(event)
+
+
+
 class MultiSelect(Widget):
     ALLOW_SELECT = False
 
@@ -221,11 +232,11 @@ class MultiSelect(Widget):
         if event.widget != self.selection_list:
             self.collapsible.collapsed = not self.collapsible.collapsed
 
-    @override
-    def _on_leave(self, event: events.Leave) -> None:
-        if not self.is_mouse_over:
-            self.collapsible.collapsed = True
-        return super()._on_leave(event)
+    # @override
+    # def _on_leave(self, event: events.Leave) -> None:
+    #     if not self.is_mouse_over:
+    #         self.collapsible.collapsed = True
+    #     return super()._on_leave(event)
 
 
 class DishElement(HorizontalGroup):

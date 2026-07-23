@@ -11,7 +11,7 @@ from textual.css.query import NoMatches
 from textual.notifications import Notification
 from textual.reactive import var
 from textual.widgets import Button, Collapsible, Digits, Header, Label, ListItem, ListView, Placeholder, SelectionList, Static, Input, Select
-from components import RadioSelectionList, Tag, Ingrediant, MultiSelect, DishElement, ShoppingListSection
+from components import DismissHandlingContainer, RadioSelectionList, Tag, Ingrediant, MultiSelect, DishElement, ShoppingListSection
 
 import sys
 
@@ -120,7 +120,7 @@ class MadApp(App[Any]):
         maincontainer = self.query_one("#maincontainer")
         maincontainer.remove_children()
 
-        findpage = Container(id="findpage")
+        findpage = DismissHandlingContainer(id="findpage")
         maincontainer.mount(findpage)
         results_list = VerticalScroll(id="findpage-results")
         results_list.border_title = "Opskrifter"
